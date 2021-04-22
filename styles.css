@@ -1,0 +1,107 @@
+.divResize {
+    resize: none;
+    height: 100%;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;
+    /* Firefox, other Gecko */
+    box-sizing: border-box;
+    /* Opera/IE 8+ */
+}
+
+body {
+    background-image: url("resources/background.PNG");
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed;
+    background-size: auto;
+    bottom: 0px;
+    margin-bottom: 10rem;
+    /* distanciar o conteúdo do rodapé fixo flutuante */
+}
+
+a:link {
+    color: blue
+}
+
+/* links não visitados */
+a:visited {
+    color: red
+}
+
+/* links visitados */
+a:hover {
+    font-weight: bold
+}
+
+/* user hovers */
+a:active {
+    color: lime
+}
+
+/* links ativos */
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    /* background-color: rgb(221, 239, 243); */
+    /* background-color: #e4e1e1; */
+    background-size: contain;
+    background-blend-mode: overlay;
+    background-position-y: 36%;
+    background-position-x: 45%;
+    background-image: linear-gradient(to top, #83a7cc 0%, #dbefff 100%);
+
+    text-align: center;
+
+    /* background-image: url("resources/footer.PNG");
+    background-size: cover; */
+    
+    /* background-repeat: no-repeat, no-repeat; */
+}
+
+.btn {
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 0px;
+    padding-bottom: 0px; 
+}
+
+div {
+    text-align: center;
+    align-content: center;
+}
+
+table{
+    margin: auto; 
+}
+
+.border{
+    background-color:rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    /* margin: 2px; */
+}
+
+#footer-logo{
+    /* margin: auto; */
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+#outro_sys{
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+#suporte{
+    display: none;
+
+    /* height: 100%; */
+    /* width: 100%;   */
+    width: 26rem;
+    height: 14rem;
+}

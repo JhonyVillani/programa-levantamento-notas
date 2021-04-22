@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicação de Notas</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+        integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="sticky-top">
+                    <h6>Selecione o sistema:</h6>
+
+                    <div id="listar_system"></div>
+
+                    <br><button type="button" class="btn btn-primary float-center" id="add_nota" data-toggle="modal"
+                        data-target="#modalRegistro" onmouseover="validaSistema()">Adicionar Notas</button>
+
+                    <button type="button" class="btn btn-danger float-center" onclick="limparStorage()"><i class="fa fa-trash"></i></button>
+
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <h6>Notas a serem aplicadas:</h6>
+                <div class="border" id="listar_notas"></div>
+            </div>
+            <div class="col-md-3">
+                <h6>Sub Notas a serem aplicadas:</h6>
+                <div class="border" id="listar_subnotas"></div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="sticky-top">
+
+                    <h6>Andamento</h6>
+                    <div id="listar_totais"></div>
+
+                    <br>
+
+                    <button type="button" id="btnSuporte" class="btn btn-primary float-center" onclick="exibeSuporte(1, true)">Tutorial</i></button>
+                    <br><br>
+                    <iframe id="suporte"></iframe>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalRegistro" tabindex="-1" role="dialog" aria-labelledby="modalRegistroLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalRegistroLabel">Notas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <!--ini-->
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <textarea id="notas_adicionar" class="form-control" rows="10"
+                                    placeholder="cole aqui as notas..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button id="btnSalvar" onclick="gravarNotas();" class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalSub" tabindex="-1" role="dialog" aria-labelledby="modalSubLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalSubLabel">Tabela de notas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <!--ini-->
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input id="primeira_linha" type="text" class="form-control"
+                                placeholder="PASSO 2: SAP_XXX	XXX	XXX	NOTA1234567" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <textarea id="subnotas_adicionar" class="form-control" rows="10"
+                                    placeholder="PASSO 1: cole aqui a tabela de pré-requisitos..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button id="btnZeroSub" type="button" class="btn btn-danger">Não possui subnotas</button>
+                    <button id="btnSalvarSub" class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<footer>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2" id="footer-logo">
+                <img src="resources/logo-intelligenza_2015_simples.png" alt="ITZ logo" width="200rem">
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+    integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+    crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+    integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+    crossorigin="anonymous"></script>
+<script src="index.js"></script>
+
+</html>
