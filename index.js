@@ -87,18 +87,14 @@ function gravarNotas() {
    let notasAdicionar = Array.from(notasUnicas).sort()
 
    // recebe uma cópia das notas do storage
-   let copiaNotas = mainList
+   let copiaNotas = []
+
+   for (let i = 0; i < mainList.length; i++) {
+      copiaNotas.push(mainList[i].nota)
+   }
 
    // checa se a nota já foi adicionada ao storage
-   if (copiaNotas) { //checa se vazio primeiro
-
-      for (let i = 0; i < copiaNotas.length; i++) {
-         if (notasAdicionar.includes(copiaNotas[i].nota)) {
-            notasAdicionar.splice(copiaNotas[i], 1)
-               --i
-         }
-      }
-   }
+   notasAdicionar = validarDiferenca(notasAdicionar, copiaNotas)
 
    for (let i = 0; i < notasAdicionar.length; i++) {
       mainList.push(new Nota(notasAdicionar[i], 0))
@@ -125,7 +121,9 @@ function listarNotas() {
       // let sorted = Array.from(mainList).sort((a, b) => (a.nota > b.nota) ? 1 : -1)
 
       // ordena por id = 0, depois por ordem crescente
-      let sorted = Array.from(mainList).sort((a, b) => ((b.status == 0) ? 1 : -1) || ((a.nota > b.nota) ? 1 : -1))
+      let sorted = Array.from(mainList).sort(function (a, b) {
+         return a.status - b.status || a.nota - b.nota;
+      });
 
       for (let i = 0; i < sorted.length; i++) {
          let refNote = ""
@@ -159,7 +157,9 @@ function listarNotas() {
    if (subList) {
 
       // ordena
-      sorted = Array.from(subList).sort((a, b) => ((b.status == 0) ? 1 : -1) || ((a.nota > b.nota) ? 1 : -1))
+      sorted = Array.from(subList).sort(function (a, b) {
+         return a.status - b.status || a.nota - b.nota;
+      });
 
       for (let i = 0; i < sorted.length; i++) {
          let refNote = ""
@@ -227,7 +227,6 @@ function gravarSubNotas(nota, nda, tipo) {
       } else {
          return false
       }
-
    }
 
    let sistema = validaSistema(true)
@@ -265,22 +264,20 @@ function gravarSubNotas(nota, nda, tipo) {
       }
    }
 
-   // ordena as notas
-   let notasAdicionar = Array.from(subNotas).sort()
+   // ordena as notas enviadas
+   let notasAdicionar = Array.from(subNotas).sort((a, b) => (a > b) ? 1 : -1)
 
    // recebe uma cópia das notas do storage
-   let copiaNotas = subList
+   let copiaNotas = []
+
+   for (let i = 0; i < subList.length; i++) {
+      copiaNotas.push(subList[i].nota)
+   }
 
    // checa se a nota já foi adicionada ao storage
-   if (copiaNotas) { //checa se vazio primeiro
+   notasAdicionar = validarDiferenca(notasAdicionar, copiaNotas)
 
-      for (let i = 0; i < copiaNotas.length; i++) {
-         if (notasAdicionar.includes(copiaNotas[i].nota)) {
-            notasAdicionar.splice(copiaNotas[i], 1)
-               --i
-         }
-      }
-   }
+   // notasAdicionar = validarDiferenca(notasAdicionar, copiaNotas)
 
    for (let i = 0; i < notasAdicionar.length; i++) {
       subList.push(new Nota(notasAdicionar[i], 0))
@@ -301,6 +298,12 @@ function gravarSubNotas(nota, nda, tipo) {
 
    listarNotas()
 
+}
+
+// valida diferença entre arrays
+function validarDiferenca(r1, r2) {
+   let r3 = r1.filter(a => !r2.includes(a));
+   return r3
 }
 
 // risca notas levantadas
@@ -570,7 +573,10 @@ function exportar(show = true) {
 
             dom: 'Blfrtip',
 
-            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+            lengthMenu: [
+               [10, 25, 50, 100, -1],
+               [10, 25, 50, 100, "Todos"]
+            ],
 
             buttons: [
                // 'copy', 'csv', 'excel', 'pdf', 'print'
