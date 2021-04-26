@@ -158,7 +158,6 @@ function listarNotas() {
 
    if (subList) {
 
-
       // ordena
       sorted = Array.from(subList).sort((a, b) => ((b.status == 0) ? 1 : -1) || ((a.nota > b.nota) ? 1 : -1))
 
@@ -190,7 +189,7 @@ function listarNotas() {
 
    listarTotais()
 
-   function listarTotais(){
+   function listarTotais() {
 
       let html = `
       <p>Total de Notas: ${mainList.length}<br>
@@ -470,10 +469,150 @@ function exibeSuporte(info, show = false) {
 
    if (info == 1 && show == true) {
       document.getElementById("suporte").style.display = "block";
+      document.getElementById("btnSuporte").setAttribute("class", "btn btn-secondary");
       document.getElementById("btnSuporte").setAttribute("onClick", "exibeSuporte(" + info + ")");
    } else if (info == 1 && show == false) {
       document.getElementById("suporte").style.display = "none";
+      document.getElementById("btnSuporte").setAttribute("class", "btn btn-primary");
       document.getElementById("btnSuporte").setAttribute("onClick", "exibeSuporte(" + info + "," + true + ")");
+   }
+
+}
+
+// exibe tabela e opções para exportação
+function exportar(show = true) {
+
+   if (mainList == '') {
+      alert("Não há notas listadas!")
+      return false
+   }
+
+   if (show == true) {
+      document.getElementById("btnExportarTabela").setAttribute("onClick", "exportar(false)");
+      document.getElementById("btnExportarTabela").setAttribute("class", "btn btn-secondary");
+   } else if (show == false) {
+      document.getElementById("listar_tabela_excel").innerHTML = ""
+      document.getElementById("btnExportarTabela").setAttribute("onClick", "exportar()");
+      document.getElementById("btnExportarTabela").setAttribute("class", "btn btn-success");
+      return false
+   }
+
+   let colunaA = []
+   let colunaB = new Set()
+
+   // adiciona as notas principais às duas colunas
+   for (let i = 0; i < mainList.length; i++) {
+      colunaA.push(mainList[i].nota)
+      colunaB.add(mainList[i].nota)
+   }
+
+   colunaA.sort((a, b) => (a > b) ? 1 : -1)
+
+   // adiciona as subnotas à segunda coluna
+   for (let i = 0; i < subList.length; i++) {
+      colunaB.add(subList[i].nota)
+   }
+
+   let sortedB = Array.from(colunaB).sort((a, b) => (a > b) ? 1 : -1)
+
+   let html = `
+      <br><br><br>
+      <table id="table_notes" class="display" style="width:50%">
+         <thead>
+         <tr>
+               <th>Notas</th>
+               <th>Subnotas</th>
+         </tr>
+      </thead>
+      <tbody>
+   `;
+
+   for (let i = 0; i < sortedB.length; i++) {
+
+      if (i < colunaA.length) {
+         html += `<tr><td>${colunaA[i]}</td><td>${sortedB[i]}</td></tr>`
+      } else {
+         html += `<tr><td></td><td>${sortedB[i]}</td></tr>`
+      }
+
+   }
+
+   html += "</tbody></table>"
+
+   carregaTabelaDatatables()
+
+   document.getElementById("listar_tabela_excel").innerHTML = html;
+
+   setTimeout(() => { //aguarda carregar a tabela
+      document.getElementById('listar_tabela_excel').scrollIntoView({
+         block: 'start',
+         behavior: 'smooth',
+      });
+   }, 500);
+
+   // chama a classe datatables
+   function carregaTabelaDatatables() {
+      $(document).ready(function () {
+         $('#table_notes').DataTable({
+
+            select: true,
+
+            "order": [
+               [1, "asc"]
+            ], //asc ou desc, index com início 0
+
+            // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            "lengthMenu": [10, 25, 50, 75, 100],
+
+            language: {
+               url: 'https://cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
+            },
+
+            dom: 'Blfrtip',
+
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+
+            buttons: [
+               // 'copy', 'csv', 'excel', 'pdf', 'print'
+
+               {
+                  text: 'Copiar',
+                  extend: 'copy',
+                  className: 'btn btn-primary'
+               },
+               {
+                  text: 'CSV',
+                  extend: 'csv',
+                  className: 'btn btn-primary'
+               },
+               {
+                  text: 'Excel',
+                  extend: 'excel',
+                  className: 'btn btn-primary'
+               },
+               {
+                  text: 'PDF',
+                  extend: 'pdf',
+                  className: 'btn btn-primary'
+               },
+               {
+                  text: 'Imprimir',
+                  extend: 'print',
+                  className: 'btn btn-primary'
+               }
+            ]
+         });
+      });
+
+      // $(document).ready(function () {
+      //    $('#example').DataTable({
+      //       dom: 'Bfrtip',
+      //       buttons: [
+      //          'copy', 'csv', 'excel', 'pdf', 'print'
+      //       ]
+      //    });
+      // });
+
    }
 
 }

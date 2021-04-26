@@ -13,6 +13,8 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <link rel="stylesheet" href="styles.css">
+    <!--tables-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.24/datatables.min.css" />
 
 </head>
 
@@ -21,6 +23,7 @@
         <div class="row">
             <div class="col-md-2">
                 <div class="sticky-top">
+
                     <h6>Selecione o sistema:</h6>
 
                     <div id="listar_system"></div>
@@ -28,7 +31,11 @@
                     <br><button type="button" class="btn btn-primary float-center" id="add_nota" data-toggle="modal"
                         data-target="#modalRegistro" onmouseover="validaSistema()">Adicionar Notas</button>
 
-                    <button type="button" class="btn btn-danger float-center" onclick="limparStorage()"><i class="fa fa-trash"></i></button>
+                    <button type="button" class="btn btn-danger float-center" onclick="limparStorage()"><i
+                            class="fa fa-trash"></i></button>
+                    <br><br>
+                    <button type="button" id="btnExportarTabela" class="btn btn-success float-center"
+                        onclick="exportar()">Exportar <i class="fa fa-table"></i></button>
 
                 </div>
             </div>
@@ -50,7 +57,8 @@
 
                     <br>
 
-                    <button type="button" id="btnSuporte" class="btn btn-primary float-center" onclick="exibeSuporte(1, true)">Tutorial</i></button>
+                    <button type="button" id="btnSuporte" class="btn btn-primary float-center"
+                        onclick="exibeSuporte(1, true)">Tutorial</i></button>
                     <br><br>
                     <iframe id="suporte"></iframe>
                 </div>
@@ -128,13 +136,28 @@
         </div>
     </div>
 
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="listar_tabela_excel"></div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 <footer>
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2" id="footer-logo">
+
+            <div class="col-md-2" id="footer_options">
+                <a href="#top"><i class="fa fa-home"></i>topo</a>
+                <br><a href="mailto:jhonyvillani@intelligenzait.com"><i class="fa fa-envelope-square"></i>Suporte</a>
+
+            </div>
+
+            <div class="col-md-8" id="footer-logo">
                 <img src="resources/logo-intelligenza_2015_simples.png" alt="ITZ logo" width="200rem">
             </div>
         </div>
@@ -148,9 +171,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
     integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
     crossorigin="anonymous"></script>
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+    integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+    crossorigin="anonymous"></script> -->
+<script src="index.js"></script>
+
+<!--tables-->
+
+<script src="datatables/jquery-3.5.1.js"></script>
+<script src="datatables/jquery.dataTables.min.js"></script>
+<script src="datatables/dataTables.buttons.min.js"></script>
+<script src="datatables/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="datatables/vfs_fonts.js"></script>
+<script src="datatables/buttons.html5.min.js"></script>
+<script src="datatables/buttons.print.min.js"></script>
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
     integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
     crossorigin="anonymous"></script>
-<script src="index.js"></script>
 
 </html>
