@@ -52,6 +52,14 @@ class Nota {
    }
 }
 
+class SubNota extends Nota {
+   constructor(grau, notaPai, nota, status) {
+      super(nota, status);
+      this.grau = grau;
+      this.notaPai = notaPai;
+   }
+}
+
 class System {
    constructor(sys, status) {
       this.sys = sys;
@@ -134,7 +142,7 @@ function listarNotas() {
          } else {
             refNote = `<td><a href="${siteSAP}${sorted[i].nota}" target="_blank">${sorted[i].nota}</a></td>`
             refBtn = `<td><button type='button' class='btn btn-primary' data-toggle="modal" data-target="#modalSub"
-            onclick="prepararBtnSub(${sorted[i].nota}, 1)"><i class='fa fa-tasks' /></button></td>`
+            onclick="prepararBtnSub(0, ${sorted[i].nota}, 1)"><i class='fa fa-tasks' /></button></td>`
          }
 
          html += `
@@ -165,12 +173,12 @@ function listarNotas() {
          let refNote = ""
          let refBtn = ""
          if (sorted[i].status == 1) { //coloca estilo taxado
-            refNote = `<td><s>${sorted[i].nota}</s></td>`
+            refNote = `<td><s>${sorted[i].grau}º-${sorted[i].nota}</s></td>`
             refBtn = `<td><button type='button' class='btn btn-primary' disabled><i class='fa fa-tasks' /></button></td>`
          } else {
-            refNote = `<td><a href="${siteSAP}${sorted[i].nota}" target="_blank">${sorted[i].nota}</a></td>`
+            refNote = `<td><a href="${siteSAP}${sorted[i].nota}" target="_blank">${sorted[i].grau}º-${sorted[i].nota}</a></td>`
             refBtn = `<td><button type='button' class='btn btn-primary' data-toggle="modal" data-target="#modalSub"
-            onclick="prepararBtnSub(${sorted[i].nota}, 2)"><i class='fa fa-tasks' /></button></td>`
+            onclick="prepararBtnSub(${sorted[i].grau}, ${sorted[i].nota}, 2)"><i class='fa fa-tasks' /></button></td>`
          }
 
          html += `
@@ -201,17 +209,26 @@ function listarNotas() {
 }
 
 // define propriedades para chamar o gravarSubnotas
-function prepararBtnSub(nota, tipo) {
+function prepararBtnSub(grau, notaPai, tipo) {
+
+   // tipo 1 - lista de notas (para riscar da lista)
+   // tipo 2 - lista de subnotas (para riscar da lista)
 
    document.getElementById('modalSubLabel').innerHTML = `
-   Tabela de notas para <a href="${siteSAP}${nota}" target="_blank">${nota}</a>
+   Tabela de notas para <a href="${siteSAP}${notaPai}" target="_blank">${notaPai}</a>
    `;
-   document.getElementById("btnSalvarSub").setAttribute('onClick', 'gravarSubNotas(' + nota + ', false, ' + tipo + ')');
-   document.getElementById("btnZeroSub").setAttribute('onClick', 'gravarSubNotas(' + nota + ', true, ' + tipo + ')');
+
+   document.getElementById("btnSalvarSub")
+      .setAttribute('onClick', 'gravarSubNotas(' + grau + ',' + notaPai + ', false, ' + tipo + ')');
+
+   document.getElementById("btnZeroSub")
+      .setAttribute('onClick', 'gravarSubNotas(' + grau + ',' + notaPai + ', true, ' + tipo + ')');
 }
 
 // grava subnotas
-function gravarSubNotas(nota, nda, tipo) {
+function gravarSubNotas(grau, notaPai, nda, tipo) {
+
+   // nda - não possui subnotas de pré-requisito
 
    if (nda) { //true
       let _confirm = confirm("Não há notas a serem aplicadas? Tem certeza?")
@@ -220,7 +237,7 @@ function gravarSubNotas(nota, nda, tipo) {
          alert("Definido como OK!")
          document.getElementById('primeira_linha').value = ""; //limpa campos
          document.getElementById('subnotas_adicionar').value = "";
-         defineOK(nota, tipo)
+         defineOK(notaPai, tipo)
          $("#modalSub").modal("hide")
          listarNotas()
          return
@@ -277,17 +294,19 @@ function gravarSubNotas(nota, nda, tipo) {
    // checa se a nota já foi adicionada ao storage
    notasAdicionar = validarDiferenca(notasAdicionar, copiaNotas)
 
-   // notasAdicionar = validarDiferenca(notasAdicionar, copiaNotas)
-
+   // notasAdicionar = validarDiferenca(notasAdicionar, copiaNotas
+   grau++;
    for (let i = 0; i < notasAdicionar.length; i++) {
-      subList.push(new Nota(notasAdicionar[i], 0))
+      subList.push(new SubNota(grau, notaPai, notasAdicionar[i], 0))
    }
+
+   console.dir(notasAdicionar)
 
    localStorage.setItem("__notas_sub__", JSON.stringify(subList))
 
    document.getElementById('primeira_linha').value = ""; //limpa campos
    document.getElementById('subnotas_adicionar').value = "";
-   defineOK(nota, tipo)
+   defineOK(notaPai, tipo)
    $("#modalSub").modal("hide")
 
    if (notasAdicionar.length > 0) {
@@ -307,16 +326,16 @@ function validarDiferenca(r1, r2) {
 }
 
 // risca notas levantadas
-function defineOK(nota, tipo) {
+function defineOK(notaPai, tipo) {
    if (tipo == 1) {
       for (i = 0; i < mainList.length; i++) {
-         if (mainList[i].nota == nota) mainList[i].status = 1
+         if (mainList[i].nota == notaPai) mainList[i].status = 1
       }
 
       localStorage.setItem("__notas_principais__", JSON.stringify(mainList))
    } else if (tipo == 2) {
       for (i = 0; i < subList.length; i++) {
-         if (subList[i].nota == nota) subList[i].status = 1
+         if (subList[i].nota == notaPai) subList[i].status = 1
       }
       localStorage.setItem("__notas_sub__", JSON.stringify(subList))
    }
@@ -500,43 +519,40 @@ function exportar(show = true) {
       return false
    }
 
-   let colunaA = []
-   let colunaB = new Set()
+   // let colunaA = []
+   // let colunaB = new Set()
 
-   // adiciona as notas principais às duas colunas
-   for (let i = 0; i < mainList.length; i++) {
-      colunaA.push(mainList[i].nota)
-      colunaB.add(mainList[i].nota)
-   }
+   // // adiciona as notas principais às duas colunas
+   // for (let i = 0; i < mainList.length; i++) {
+   //    colunaA.push(mainList[i].nota)
+   //    colunaB.add(mainList[i].nota)
+   // }
 
-   colunaA.sort((a, b) => (a > b) ? 1 : -1)
+   // colunaA.sort((a, b) => (a > b) ? 1 : -1)
 
-   // adiciona as subnotas à segunda coluna
-   for (let i = 0; i < subList.length; i++) {
-      colunaB.add(subList[i].nota)
-   }
+   // // adiciona as subnotas à segunda coluna
+   // for (let i = 0; i < subList.length; i++) {
+   //    colunaB.add(subList[i].nota)
+   // }
 
-   let sortedB = Array.from(colunaB).sort((a, b) => (a > b) ? 1 : -1)
+   // let sortedB = Array.from(colunaB).sort((a, b) => (a > b) ? 1 : -1)
 
    let html = `
       <br><br><br>
       <table id="table_notes" class="display" style="width:50%">
          <thead>
          <tr>
-               <th>Notas</th>
-               <th>Subnotas</th>
+            <th>Grau</th>
+            <th>Notas</th>
+            <th>Subnotas</th>
          </tr>
       </thead>
       <tbody>
    `;
 
-   for (let i = 0; i < sortedB.length; i++) {
+   for (let i = 0; i < subList.length; i++) {
 
-      if (i < colunaA.length) {
-         html += `<tr><td>${colunaA[i]}</td><td>${sortedB[i]}</td></tr>`
-      } else {
-         html += `<tr><td></td><td>${sortedB[i]}</td></tr>`
-      }
+      html += `<tr><td>${subList[i].grau}</td><td>${subList[i].notaPai}</td><td>${subList[i].nota}</td></tr>`
 
    }
 
@@ -561,7 +577,7 @@ function exportar(show = true) {
             select: true,
 
             "order": [
-               [1, "asc"]
+               [0, "asc"]
             ], //asc ou desc, index com início 0
 
             // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
