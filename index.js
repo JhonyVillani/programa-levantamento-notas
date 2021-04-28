@@ -246,39 +246,15 @@ function gravarSubNotas(grau, notaPai, nda, tipo) {
       }
    }
 
-   let sistema = validaSistema(true)
-
-   let textAreaContent = document.getElementById("subnotas_adicionar")
-   let primeiraLinha = document.getElementById("primeira_linha").value
-
    let subNotas = new Set()
 
-   if (textAreaContent.value == "") {
-      alert("Lista vazia!")
-      return false
-   }
+   // recebe CTRL + V do site da SAP
+   let dadosSite = lerPaginaSap()
+   let notasSite = dadosSite[0]
+   let reasonSite = dadosSite[1]
 
-   // posicao da nota
-   let lastNotePos = primeiraLinha.length
-   let firstNotePos = primeiraLinha.length - 7
-
-   // posicao do sistema
-   let lastSysPos = primeiraLinha.length - 8
-   let firstSysPos = primeiraLinha.length - 11
-   let linhas = textAreaContent.value.split("\n");
-
-   let qtdNotas = 0
-
-   for (let i = 0; i < linhas.length; i++) {
-
-      if (linhas[i].length < 1) { //elimina linhas vazias
-         continue
-      }
-
-      if (sistema == linhas[i].substring(firstSysPos, lastSysPos)) {
-         qtdNotas++
-         subNotas.add(linhas[i].substring(firstNotePos, lastNotePos))
-      }
+   for (let i = 0; i < notasSite.length; i++) {
+      subNotas.add(notasSite[i])
    }
 
    // ordena as notas enviadas
@@ -300,12 +276,9 @@ function gravarSubNotas(grau, notaPai, nda, tipo) {
       subList.push(new SubNota(grau, notaPai, notasAdicionar[i], 0))
    }
 
-   console.dir(notasAdicionar)
-
    localStorage.setItem("__notas_sub__", JSON.stringify(subList))
 
-   document.getElementById('primeira_linha').value = ""; //limpa campos
-   document.getElementById('subnotas_adicionar').value = "";
+   document.getElementById('subnotas_adicionar').value = ""; //limpa campos
    defineOK(notaPai, tipo)
    $("#modalSub").modal("hide")
 
@@ -519,24 +492,6 @@ function exportar(show = true) {
       return false
    }
 
-   // let colunaA = []
-   // let colunaB = new Set()
-
-   // // adiciona as notas principais às duas colunas
-   // for (let i = 0; i < mainList.length; i++) {
-   //    colunaA.push(mainList[i].nota)
-   //    colunaB.add(mainList[i].nota)
-   // }
-
-   // colunaA.sort((a, b) => (a > b) ? 1 : -1)
-
-   // // adiciona as subnotas à segunda coluna
-   // for (let i = 0; i < subList.length; i++) {
-   //    colunaB.add(subList[i].nota)
-   // }
-
-   // let sortedB = Array.from(colunaB).sort((a, b) => (a > b) ? 1 : -1)
-
    let html = `
       <br><br><br>
       <table id="table_notes" class="display" style="width:50%">
@@ -544,7 +499,7 @@ function exportar(show = true) {
          <tr>
             <th>Grau</th>
             <th>Notas</th>
-            <th>Subnotas</th>
+            <th>Pré-Requisitos</th>
          </tr>
       </thead>
       <tbody>
@@ -577,7 +532,7 @@ function exportar(show = true) {
             select: true,
 
             "order": [
-               [0, "asc"]
+               [0, "desc"]
             ], //asc ou desc, index com início 0
 
             // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -637,6 +592,53 @@ function exportar(show = true) {
 
    }
 
+}
+
+// recebe CTRL+V da página do SAP
+function lerPaginaSap() {
+   let textAreaContent = document.getElementById("subnotas_adicionar")
+
+   // valida se vazio
+   if (textAreaContent.value == "") {
+      alert("Lista vazia!")
+      return false
+   }
+
+   // divide o conteúdo em linhas
+   let linhas = textAreaContent.value.split("\n");
+
+   let sistema = validaSistema(true)
+
+   let count = 0
+   let html = ""
+   let lastLine
+   let listaNotas = []
+   let preRequisite = ""
+
+   for (let i = 0; i < linhas.length; i++) {
+      if (linhas[i].length < 1) { //elimina linhas vazias
+         continue
+      } else if (linhas[i].indexOf("Reason and Prerequisites") == 0) { //lê as razões
+
+         if (!(linhas[i + 1].indexOf("Solution") == 0)) { //lê as razões até Solution
+            preRequisite += linhas[i + 1] + " "
+         }
+
+      } else if (linhas[i].indexOf("Prerequisites:") == 0) { //ignora primeira tag
+         continue;
+      } else if (linhas[i].indexOf("Prerequisites") == 0) { //lê a partir da segunda tag
+         lastLine = i
+      } else if (linhas[i].includes(sistema) && i > lastLine) {
+
+         if ((linhas[i].lastIndexOf(sistema) - linhas[i].indexOf(sistema)) == 4) {
+            listaNotas.push(linhas[i].substring((linhas[i].lastIndexOf(sistema) + sistema.length + 1), (linhas[i].lastIndexOf(sistema) + sistema.length + 8)))
+         }
+      }
+
+   }
+
+   let listaRetorno = [listaNotas, preRequisite]
+   return listaRetorno
 }
 
 window.onload = lerStorage(), lerRadioSistema(), listarNotas(); // carrega a tabela junto com a página
