@@ -43,6 +43,7 @@ var sysDefault = `
 
 var mainList = []
 var subList = []
+var reqManual = []
 const siteSAP = "https://launchpad.support.sap.com/#/notes/"
 
 class Nota {
@@ -57,6 +58,13 @@ class SubNota extends Nota {
       super(nota, status);
       this.grau = grau;
       this.notaPai = notaPai;
+   }
+}
+
+class PreReq {
+   constructor(nota, requisito) {
+      this.nota = nota;
+      this.requisito = requisito;
    }
 }
 
@@ -235,8 +243,14 @@ function gravarSubNotas(grau, notaPai, nda, tipo) {
 
       if (_confirm) {
          alert("Definido como OK!")
-         document.getElementById('primeira_linha').value = ""; //limpa campos
-         document.getElementById('subnotas_adicionar').value = "";
+         document.getElementById('subnotas_adicionar').value = ""; //limpa campos
+
+         console.log("entrou")
+         // if (tipo == 1) mainList.push(new SubNota(grau, notaPai, notaPai, 1)) // adiciona a nota pai como requisito
+
+         subList.push(new SubNota(1, notaPai, notaPai, 1))
+         localStorage.setItem("__notas_sub__", JSON.stringify(subList))
+
          defineOK(notaPai, tipo)
          $("#modalSub").modal("hide")
          listarNotas()
@@ -252,6 +266,10 @@ function gravarSubNotas(grau, notaPai, nda, tipo) {
    let dadosSite = lerPaginaSap()
    let notasSite = dadosSite[0]
    let reasonSite = dadosSite[1]
+   let manualImplement = dadosSite[2]
+
+   reqManual.push(new PreReq(notaPai, manualImplement))
+   localStorage.setItem("__req_manual__", JSON.stringify(reqManual))
 
    for (let i = 0; i < notasSite.length; i++) {
       subNotas.add(notasSite[i])
@@ -276,8 +294,6 @@ function gravarSubNotas(grau, notaPai, nda, tipo) {
       subList.push(new SubNota(grau, notaPai, notasAdicionar[i], 0))
    }
 
-   localStorage.setItem("__notas_sub__", JSON.stringify(subList))
-
    document.getElementById('subnotas_adicionar').value = ""; //limpa campos
    defineOK(notaPai, tipo)
    $("#modalSub").modal("hide")
@@ -286,7 +302,10 @@ function gravarSubNotas(grau, notaPai, nda, tipo) {
       alert("Foram adicionadas " + notasAdicionar.length + " notas")
    } else {
       alert("As notas submetidas já foram adicionadas")
+      subList.push(new SubNota(grau, notaPai, notaPai, 1))
    }
+
+   localStorage.setItem("__notas_sub__", JSON.stringify(subList))
 
    listarNotas()
 
@@ -441,6 +460,11 @@ function lerStorage() {
    if (!subList) { //se nulo, seta um array vazio
       subList = []
    }
+
+   reqManual = JSON.parse(localStorage.getItem("__req_manual__"))
+   if (!reqManual) { //se nulo, seta um array vazio
+      reqManual = []
+   }
 }
 
 function limparStorage() {
@@ -498,16 +522,28 @@ function exportar(show = true) {
          <thead>
          <tr>
             <th>Grau</th>
-            <th>Notas</th>
-            <th>Pré-Requisitos</th>
+            <th>Nota</th>
+            <th>Pré-Requisito</th>
+            <th>Passo Manual</th>
          </tr>
       </thead>
       <tbody>
    `;
 
-   for (let i = 0; i < subList.length; i++) {
+   for (let i = 0, preReq = []; i < subList.length; i++) {
 
-      html += `<tr><td>${subList[i].grau}</td><td>${subList[i].notaPai}</td><td>${subList[i].nota}</td></tr>`
+      preReq = reqManual.filter(x => x.nota == subList[i].nota).map(x => x.requisito)[0]
+
+      if (preReq == undefined) {
+         preReq = '-'
+      }
+
+      html += `<tr>
+      <td>${subList[i].grau}</td>
+      <td>${subList[i].notaPai}</td>
+      <td>${subList[i].nota}</td>
+      <td>${preReq}</td>
+      </tr>`;
 
    }
 
@@ -614,10 +650,13 @@ function lerPaginaSap() {
    let lastLine
    let listaNotas = []
    let preRequisite = ""
+   let manual = 0
 
    for (let i = 0; i < linhas.length; i++) {
       if (linhas[i].length < 1) { //elimina linhas vazias
          continue
+      } else if (linhas[i].indexOf("Manual Activities:") == 0) {
+         manual = linhas[i].substring(18, 19)
       } else if (linhas[i].indexOf("Reason and Prerequisites") == 0) { //lê as razões
 
          if (!(linhas[i + 1].indexOf("Solution") == 0)) { //lê as razões até Solution
@@ -637,7 +676,7 @@ function lerPaginaSap() {
 
    }
 
-   let listaRetorno = [listaNotas, preRequisite]
+   let listaRetorno = [listaNotas, preRequisite, manual]
    return listaRetorno
 }
 
